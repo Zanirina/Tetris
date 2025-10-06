@@ -2,6 +2,7 @@
 #include <glad/glad.h>
 #include <glm/gtc/matrix_transform.hpp>
 #include <iostream>
+#include <vector>
 
 #include "Shader.h"
 
@@ -39,8 +40,8 @@ void Renderer::initCube()
     // Here we create a very simple cube with positions only for demonstration.
 
     // We'll fill a simple cube with positions and approximate normals programmatically:
-    std::vector<float> v;
-    v.reserve(36*6);
+    std::vector<float> v;//vector is red
+    v.reserve(36*6);//v is red
     // ... (omitted for brevity — in practice use full vertex array or generate it)
     // BUT simplest: create a unit cube using 36 vertices copied from any online cube array (many tutorials).
     // For now throw a warning if left incomplete.
