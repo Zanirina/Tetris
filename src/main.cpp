@@ -15,22 +15,60 @@ float lastTime = 0.0f;
 float keyTimer = 0.0f;
 const float KEY_COOLDOWN = 0.1f;
 float downKeyTimer = 0.0f;
-const float DOWN_KEY_COOLDOWN = 0.05f; // Быстрее чем другие кнопки, но не мгновенно
+const float DOWN_KEY_COOLDOWN = 0.05f;
 
-// Color palette for different tetrominoes
+// Color palette for all 7 tetrominoes
 glm::vec3 colors[] = {
-    glm::vec3(0.8f, 0.2f, 0.2f), // Red - I
+    glm::vec3(0.2f, 0.8f, 0.8f), // Cyan - I
     glm::vec3(0.9f, 0.8f, 0.2f), // Yellow - O
-    glm::vec3(0.2f, 0.6f, 0.9f), // Blue - L
-    glm::vec3(0.7f, 0.2f, 0.8f)  // Purple - T
+    glm::vec3(0.7f, 0.2f, 0.8f), // Purple - T
+    glm::vec3(0.8f, 0.5f, 0.2f), // Orange - L
+    glm::vec3(0.2f, 0.4f, 0.8f), // Blue - J
+    glm::vec3(0.2f, 0.8f, 0.4f), // Green - S
+    glm::vec3(0.8f, 0.2f, 0.2f)  // Red - Z
 };
+
+void drawWalls(Renderer& renderer, const glm::vec3& camPos)
+{
+    // Цвет стен
+    glm::vec3 wallColor(0.3f, 0.3f, 0.4f);
+
+    // Левая стенка
+    for(int y = 0; y < Game::HEIGHT + 1; ++y) {
+        glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(-0.5f, y, 0.0f));
+        model = glm::scale(model, glm::vec3(0.5f, 0.5f, 0.5f));
+        renderer.drawCube(model, wallColor, 0.3f, 0.8f, camPos);
+    }
+
+    // Правая стенка
+    for(int y = 0; y < Game::HEIGHT + 1; ++y) {
+        glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(Game::WIDTH, y, 0.0f));
+        model = glm::scale(model, glm::vec3(0.5f, 0.5f, 0.5f));
+        renderer.drawCube(model, wallColor, 0.3f, 0.8f, camPos);
+    }
+
+    // Нижняя стенка (пол)
+    for(int x = -1; x < Game::WIDTH + 1; ++x) {
+        glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(x, -0.5f, 0.0f));
+        model = glm::scale(model, glm::vec3(0.5f, 0.5f, 0.5f));
+        renderer.drawCube(model, wallColor, 0.3f, 0.8f, camPos);
+    }
+
+    // Фон (задняя стенка) - опционально
+    for(int x = -1; x < Game::WIDTH + 1; ++x) {
+        for(int y = -1; y < Game::HEIGHT + 1; ++y) {
+            glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(x, y, -0.5f));
+            model = glm::scale(model, glm::vec3(0.5f, 0.5f, 0.5f));
+            renderer.drawCube(model, glm::vec3(0.2f, 0.2f, 0.25f), 0.4f, 0.9f, camPos);
+        }
+    }
+}
 
 void processInput(GLFWwindow* window, float dt)
 {
     keyTimer += dt;
     downKeyTimer += dt;
 
-    // Cooldown for left/right/rotate to prevent too fast movement
     if(keyTimer >= KEY_COOLDOWN) {
         if(glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
             game.moveLeft();
@@ -46,7 +84,6 @@ void processInput(GLFWwindow* window, float dt)
         }
     }
 
-    // Cooldown for down key - быстрее чем другие кнопки, но не мгновенно
     if(downKeyTimer >= DOWN_KEY_COOLDOWN) {
         if(glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
             game.moveDown();
@@ -54,14 +91,11 @@ void processInput(GLFWwindow* window, float dt)
         }
     }
 
-    // Instant action only for hard drop
     if(glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
         game.hardDrop();
     }
 
-    // Restart game when over
     if(game.isGameOver() && glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS) {
-        // Для рестарта нужно пересоздать объект Game
         game = Game();
         std::cout << "Game Restarted!" << std::endl;
     }
@@ -73,7 +107,6 @@ void framebufferSizeCallback(GLFWwindow* window, int width, int height)
     windowHeight = height;
     glViewport(0, 0, width, height);
 
-    // Update projection matrix
     if (rendererPtr) {
         Shader* sh = rendererPtr->getShader();
         sh->use();
@@ -113,14 +146,14 @@ int main()
     Renderer renderer;
     rendererPtr = &renderer;
 
-    // Camera setup - better view of the playing field
-    glm::vec3 camPos = glm::vec3(5.0f, 8.0f, 15.0f);
+    // Better camera view
+    glm::vec3 camPos = glm::vec3(4.5f, 12.0f, 20.0f);
     glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)windowWidth/windowHeight, 0.1f, 100.0f);
 
     Shader* sh = renderer.getShader();
     sh->use();
     sh->setMat4("projection", projection);
-    glm::mat4 view = glm::lookAt(camPos, glm::vec3(5.0f, 5.0f, 0.0f), glm::vec3(0,1,0));
+    glm::mat4 view = glm::lookAt(camPos, glm::vec3(4.5f, 6.0f, 0.0f), glm::vec3(0,1,0));
     sh->setMat4("view", view);
 
     lastTime = (float)glfwGetTime();
@@ -128,9 +161,9 @@ int main()
     std::cout << "Tetris PBR Controls:" << std::endl;
     std::cout << "LEFT/RIGHT: Move piece" << std::endl;
     std::cout << "UP: Rotate piece" << std::endl;
-    std::cout << "DOWN: Soft drop (faster fall)" << std::endl;
-    std::cout << "SPACE: Hard drop (instant drop)" << std::endl;
-    std::cout << "R: Restart game when game over" << std::endl;
+    std::cout << "DOWN: Soft drop" << std::endl;
+    std::cout << "SPACE: Hard drop" << std::endl;
+    std::cout << "R: Restart game" << std::endl;
 
     while(!glfwWindowShouldClose(window)){
         float time = (float)glfwGetTime();
@@ -138,14 +171,14 @@ int main()
         lastTime = time;
 
         processInput(window, dt);
-
-        // Update game logic
         game.update(dt);
 
-        // Render
         glViewport(0, 0, windowWidth, windowHeight);
-        glClearColor(0.1f, 0.1f, 0.15f, 1.0f);
+        glClearColor(0.05f, 0.05f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        // Draw walls first
+        drawWalls(renderer, camPos);
 
         // Draw grid blocks (locked pieces)
         const auto& grid = game.getGrid();
@@ -153,12 +186,11 @@ int main()
             for(int x = 0; x < Game::WIDTH; ++x){
                 int cellValue = grid[y * Game::WIDTH + x];
                 if(cellValue != 0){
-                    glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(x + 0.5f, y + 0.5f, 0.0f));
-                    model = glm::scale(model, glm::vec3(0.9f)); // small gap between blocks
+                    glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(x, y, 0.0f));
+                    model = glm::scale(model, glm::vec3(0.5f, 0.5f, 0.5f));
 
-                    // Use color based on piece type
                     int colorIndex = cellValue - 1;
-                    if(colorIndex >= 0 && colorIndex < 4) {
+                    if(colorIndex >= 0 && colorIndex < 7) {
                         glm::vec3 albedo = colors[colorIndex];
                         renderer.drawCube(model, albedo, 0.1f, 0.7f, camPos);
                     }
@@ -173,26 +205,20 @@ int main()
                 int gx = active.x + c.first;
                 int gy = active.y + c.second;
 
-                // Only draw if within visible area
                 if(gy >= 0 && gy < Game::HEIGHT && gx >= 0 && gx < Game::WIDTH) {
-                    glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(gx + 0.5f, gy + 0.5f, 0.0f));
-                    model = glm::scale(model, glm::vec3(0.95f)); // Slightly larger than locked pieces
+                    glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(gx, gy, 0.0f));
+                    model = glm::scale(model, glm::vec3(0.5f, 0.5f, 0.5f));
 
-                    // Use color based on piece type
                     int colorIndex = active.colorIndex - 1;
-                    if(colorIndex >= 0 && colorIndex < 4) {
+                    if(colorIndex >= 0 && colorIndex < 7) {
                         glm::vec3 albedo = colors[colorIndex];
-                        // Make active piece slightly metallic to distinguish it
                         renderer.drawCube(model, albedo, 0.3f, 0.3f, camPos);
                     }
                 }
             }
         }
 
-        // Draw game over message
         if(game.isGameOver()) {
-            // In a real implementation, you'd render text here
-            // For now, we'll just print to console
             static bool gameOverPrinted = false;
             if(!gameOverPrinted) {
                 std::cout << "GAME OVER! Press R to restart" << std::endl;

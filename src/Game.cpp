@@ -12,25 +12,61 @@ Game::Game() : grid(WIDTH * HEIGHT, 0), fallTimer(0.0f), fallInterval(0.7f), gam
 
 void Game::spawnRandom()
 {
-    int r = std::rand() % 4;
+    int r = std::rand() % 7; // 7 фигур вместо 4
     Piece p;
-    p.x = WIDTH / 2 - 1;
-    p.y = HEIGHT - 1; // Начинаем сверху
+    p.x = WIDTH / 2 - 2; // Центрирование
+    p.y = HEIGHT - 1;    // Появление сверху
     p.colorIndex = r + 1;
-    
-    if(r == 0) { // I
-        p.cells = { std::make_pair(0,0), std::make_pair(0,1), std::make_pair(0,-1), std::make_pair(0,-2) };
-    } else if(r == 1) { // O
-        p.cells = { std::make_pair(0,0), std::make_pair(1,0), std::make_pair(0,-1), std::make_pair(1,-1) };
-    } else if(r == 2) { // L
-        p.cells = { std::make_pair(0,0), std::make_pair(0,1), std::make_pair(0,-1), std::make_pair(1,1) };
-    } else { // T
-        p.cells = { std::make_pair(0,0), std::make_pair(-1,0), std::make_pair(1,0), std::make_pair(0,1) };
+
+    // Правильные тетрамино (как в настоящем Тетрисе)
+    switch(r) {
+        case 0: // I
+            p.cells = {
+            std::make_pair(0,0), std::make_pair(1,0),
+            std::make_pair(2,0), std::make_pair(3,0)
+        };
+            break;
+        case 1: // O
+            p.cells = {
+            std::make_pair(0,0), std::make_pair(1,0),
+            std::make_pair(0,1), std::make_pair(1,1)
+        };
+            break;
+        case 2: // T
+            p.cells = {
+            std::make_pair(1,0), std::make_pair(0,1),
+            std::make_pair(1,1), std::make_pair(2,1)
+        };
+            break;
+        case 3: // L
+            p.cells = {
+            std::make_pair(0,0), std::make_pair(0,1),
+            std::make_pair(0,2), std::make_pair(1,2)
+        };
+            break;
+        case 4: // J
+            p.cells = {
+            std::make_pair(1,0), std::make_pair(1,1),
+            std::make_pair(1,2), std::make_pair(0,2)
+        };
+            break;
+        case 5: // S
+            p.cells = {
+            std::make_pair(1,0), std::make_pair(2,0),
+            std::make_pair(0,1), std::make_pair(1,1)
+        };
+            break;
+        case 6: // Z
+            p.cells = {
+            std::make_pair(0,0), std::make_pair(1,0),
+            std::make_pair(1,1), std::make_pair(2,1)
+        };
+            break;
     }
-    
+
     active = p;
-    
-    // Проверяем, можно ли разместить новую фигуру
+
+    // Проверка Game Over
     if(checkCollision(active)) {
         gameOver = true;
         std::cout << "Game Over! Cannot spawn new piece." << std::endl;
@@ -43,7 +79,7 @@ bool Game::checkCollision(const Piece& p) const
         int gx = p.x + c.first;
         int gy = p.y + c.second;
         
-        // Проверка границ
+        // Проверка границ (стенок)
         if(gx < 0 || gx >= WIDTH || gy < 0) return true;
         
         // Проверка столкновения с заблокированными фигурами
@@ -59,14 +95,43 @@ void Game::rotate()
     if(gameOver) return;
 
     Piece rotated = active;
+
+    // Матрица вращения 90° по часовой стрелке
     for(auto &c : rotated.cells) {
         int temp = c.first;
         c.first = -c.second;
         c.second = temp;
     }
 
+    // Попробуем вращение, если не получается - откат
     if(!checkCollision(rotated)) {
         active = rotated;
+        return;
+    }
+
+    // Wall kicks - попробуем сдвинуть при вращении
+    Piece kicked = rotated;
+
+    // Попробуем сдвинуть влево
+    kicked.x = active.x - 1;
+    if(!checkCollision(kicked)) {
+        active = kicked;
+        return;
+    }
+
+    // Попробуем сдвинуть вправо
+    kicked.x = active.x + 1;
+    if(!checkCollision(kicked)) {
+        active = kicked;
+        return;
+    }
+
+    // Попробуем сдвинуть вверх
+    kicked.x = active.x;
+    kicked.y = active.y + 1;
+    if(!checkCollision(kicked)) {
+        active = kicked;
+        return;
     }
 }
 
