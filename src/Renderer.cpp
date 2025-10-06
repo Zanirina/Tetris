@@ -21,43 +21,64 @@ Renderer::~Renderer()
 
 void Renderer::initCube()
 {
-    // 36 vertices, each has pos (3) and normal (3)
     float vertices[] = {
-        // positions         // normals
-        -0.5f,-0.5f,-0.5f,   0.0f,0.0f,-1.0f,
-         0.5f, 0.5f,-0.5f,   0.0f,0.0f,-1.0f,
-         0.5f,-0.5f,-0.5f,   0.0f,0.0f,-1.0f,
-         0.5f, 0.5f,-0.5f,   0.0f,0.0f,-1.0f,
-        -0.5f,-0.5f,-0.5f,   0.0f,0.0f,-1.0f,
-        -0.5f, 0.5f,-0.5f,   0.0f,0.0f,-1.0f,
-        // ... (other faces)
-        // For brevity: fill all 36 verts (six faces).
+        // positions          // normals
+        -1.0f, -1.0f, -1.0f,  0.0f,  0.0f, -1.0f,
+         1.0f, -1.0f, -1.0f,  0.0f,  0.0f, -1.0f,
+         1.0f,  1.0f, -1.0f,  0.0f,  0.0f, -1.0f,
+         1.0f,  1.0f, -1.0f,  0.0f,  0.0f, -1.0f,
+        -1.0f,  1.0f, -1.0f,  0.0f,  0.0f, -1.0f,
+        -1.0f, -1.0f, -1.0f,  0.0f,  0.0f, -1.0f,
+
+        -1.0f, -1.0f,  1.0f,  0.0f,  0.0f, 1.0f,
+         1.0f, -1.0f,  1.0f,  0.0f,  0.0f, 1.0f,
+         1.0f,  1.0f,  1.0f,  0.0f,  0.0f, 1.0f,
+         1.0f,  1.0f,  1.0f,  0.0f,  0.0f, 1.0f,
+        -1.0f,  1.0f,  1.0f,  0.0f,  0.0f, 1.0f,
+        -1.0f, -1.0f,  1.0f,  0.0f,  0.0f, 1.0f,
+
+        -1.0f,  1.0f,  1.0f, -1.0f,  0.0f,  0.0f,
+        -1.0f,  1.0f, -1.0f, -1.0f,  0.0f,  0.0f,
+        -1.0f, -1.0f, -1.0f, -1.0f,  0.0f,  0.0f,
+        -1.0f, -1.0f, -1.0f, -1.0f,  0.0f,  0.0f,
+        -1.0f, -1.0f,  1.0f, -1.0f,  0.0f,  0.0f,
+        -1.0f,  1.0f,  1.0f, -1.0f,  0.0f,  0.0f,
+
+         1.0f,  1.0f,  1.0f,  1.0f,  0.0f,  0.0f,
+         1.0f,  1.0f, -1.0f,  1.0f,  0.0f,  0.0f,
+         1.0f, -1.0f, -1.0f,  1.0f,  0.0f,  0.0f,
+         1.0f, -1.0f, -1.0f,  1.0f,  0.0f,  0.0f,
+         1.0f, -1.0f,  1.0f,  1.0f,  0.0f,  0.0f,
+         1.0f,  1.0f,  1.0f,  1.0f,  0.0f,  0.0f,
+
+        -1.0f, -1.0f, -1.0f,  0.0f, -1.0f,  0.0f,
+         1.0f, -1.0f, -1.0f,  0.0f, -1.0f,  0.0f,
+         1.0f, -1.0f,  1.0f,  0.0f, -1.0f,  0.0f,
+         1.0f, -1.0f,  1.0f,  0.0f, -1.0f,  0.0f,
+        -1.0f, -1.0f,  1.0f,  0.0f, -1.0f,  0.0f,
+        -1.0f, -1.0f, -1.0f,  0.0f, -1.0f,  0.0f,
+
+        -1.0f,  1.0f, -1.0f,  0.0f, 1.0f,  0.0f,
+         1.0f,  1.0f, -1.0f,  0.0f, 1.0f,  0.0f,
+         1.0f,  1.0f,  1.0f,  0.0f, 1.0f,  0.0f,
+         1.0f,  1.0f,  1.0f,  0.0f, 1.0f,  0.0f,
+        -1.0f,  1.0f,  1.0f,  0.0f, 1.0f,  0.0f,
+        -1.0f,  1.0f, -1.0f,  0.0f, 1.0f,  0.0f
     };
 
-    // For simplicity: create a cube from indexed vertices is possible, but here we assume vertices[] is full set.
-    // To keep message shorter, you should paste full 36-vertex data like in many OpenGL tutorials.
-    // Alternatively use a function to generate cube vertices procedurally.
-    // Here we create a very simple cube with positions only for demonstration.
-
-    // We'll fill a simple cube with positions and approximate normals programmatically:
-    std::vector<float> v;//vector is red
-    v.reserve(36*6);//v is red
-    // ... (omitted for brevity — in practice use full vertex array or generate it)
-    // BUT simplest: create a unit cube using 36 vertices copied from any online cube array (many tutorials).
-    // For now throw a warning if left incomplete.
-    std::cerr << "[Renderer] IMPORTANT: fill the cube vertex data in Renderer::initCube() with complete 36 vertices.\n";
-
-    // create VAO/VBO (placeholder)
     glGenVertexArrays(1, &cubeVAO);
     glGenBuffers(1, &cubeVBO);
     glBindVertexArray(cubeVAO);
-    // if you had full 'vertices' array:
-    // glBindBuffer(GL_ARRAY_BUFFER, cubeVBO);
-    // glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-    // glEnableVertexAttribArray(0); glVertexAttribPointer(0,3,GL_FLOAT,GL_FALSE,6*sizeof(float),(void*)0);
-    // glEnableVertexAttribArray(1); glVertexAttribPointer(1,3,GL_FLOAT,GL_FALSE,6*sizeof(float),(void*)(3*sizeof(float)));
+    glBindBuffer(GL_ARRAY_BUFFER, cubeVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
     glBindVertexArray(0);
 }
+
 
 void Renderer::drawCube(const glm::mat4 &model, const glm::vec3 &albedo, float metallic, float roughness, const glm::vec3 &camPos)
 {

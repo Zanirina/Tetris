@@ -2,8 +2,9 @@
 #include <cstdlib>
 #include <ctime>
 #include <algorithm>
+#include <iostream>
 
-Game::Game() : grid(WIDTH * HEIGHT, 0), fallTimer(0.0f), fallInterval(0.7f)
+Game::Game() : grid(WIDTH * HEIGHT, 0), fallTimer(0.0f), fallInterval(0.7f), gameOver(false)
 {
     std::srand((unsigned)std::time(nullptr));
     spawnRandom();
@@ -11,13 +12,13 @@ Game::Game() : grid(WIDTH * HEIGHT, 0), fallTimer(0.0f), fallInterval(0.7f)
 
 void Game::spawnRandom()
 {
-    // несколько простых фигур (I, O, L, T)
     int r = std::rand() % 4;
     Piece p;
     p.x = WIDTH / 2 - 1;
-    p.y = HEIGHT - 2;
-    p.colorIndex = (r+1);
-    if(r == 0) { // I (vertical)
+    p.y = HEIGHT - 4; // Start lower
+    p.colorIndex = r + 1;
+
+    if(r == 0) { // I
         p.cells = { std::make_pair(0,0), std::make_pair(0,1), std::make_pair(0,-1), std::make_pair(0,2) };
     } else if(r == 1) { // O
         p.cells = { std::make_pair(0,0), std::make_pair(1,0), std::make_pair(0,1), std::make_pair(1,1) };
@@ -26,7 +27,14 @@ void Game::spawnRandom()
     } else { // T
         p.cells = { std::make_pair(0,0), std::make_pair(-1,0), std::make_pair(1,0), std::make_pair(0,1) };
     }
+
     active = p;
+
+    // Check if game over
+    if(checkCollision(active)) {
+        gameOver = true;
+        std::cout << "Game Over!" << std::endl;
+    }
 }
 
 bool Game::checkCollision(const Piece& p) const
@@ -35,11 +43,25 @@ bool Game::checkCollision(const Piece& p) const
         int gx = p.x + c.first;
         int gy = p.y + c.second;
         if(gx < 0 || gx >= WIDTH || gy < 0) return true;
-        if(gy < HEIGHT) {
-            if(grid[gy * WIDTH + gx] != 0) return true;
-        }
+        if(gy < HEIGHT && grid[gy * WIDTH + gx] != 0) return true;
     }
     return false;
+}
+
+void Game::rotate()
+{
+    if(gameOver) return;
+
+    Piece rotated = active;
+    for(auto &c : rotated.cells) {
+        int temp = c.first;
+        c.first = -c.second;
+        c.second = temp;
+    }
+
+    if(!checkCollision(rotated)) {
+        active = rotated;
+    }
 }
 
 void Game::lockPiece()
@@ -62,20 +84,21 @@ void Game::clearLines()
             if(grid[y * WIDTH + x] == 0){ full = false; break; }
         }
         if(full){
-            // remove line
             for(int yy = y; yy < HEIGHT-1; ++yy){
                 for(int x = 0; x < WIDTH; ++x)
                     grid[yy * WIDTH + x] = grid[(yy+1) * WIDTH + x];
             }
-            // clear top
-            for(int x = 0; x < WIDTH; ++x) grid[(HEIGHT-1) * WIDTH + x] = 0;
-            --y; // recheck same y index
+            for(int x = 0; x < WIDTH; ++x)
+                grid[(HEIGHT-1) * WIDTH + x] = 0;
+            --y;
         }
     }
 }
 
 void Game::update(float dt)
 {
+    if(gameOver) return;
+
     fallTimer += dt;
     if(fallTimer >= fallInterval){
         fallTimer = 0.0f;
@@ -91,27 +114,34 @@ void Game::update(float dt)
 
 void Game::moveLeft()
 {
+    if(gameOver) return;
     Piece moved = active; moved.x -= 1;
     if(!checkCollision(moved)) active = moved;
 }
+
 void Game::moveRight()
 {
+    if(gameOver) return;
     Piece moved = active; moved.x += 1;
     if(!checkCollision(moved)) active = moved;
 }
+
 void Game::moveDown()
 {
+    if(gameOver) return;
     Piece moved = active; moved.y -= 1;
     if(!checkCollision(moved)) active = moved;
-    else { lockPiece(); }
+    else lockPiece();
 }
+
 void Game::hardDrop()
 {
+    if(gameOver) return;
     Piece moved = active;
-    while(true){
+    while(!checkCollision(moved)){
         moved.y -= 1;
-        if(checkCollision(moved)) { moved.y += 1; break; }
     }
+    moved.y += 1; // Go back to last valid position
     active = moved;
     lockPiece();
 }

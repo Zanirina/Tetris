@@ -3,9 +3,8 @@
 #include <array>
 
 struct Piece {
-    // хранит блоки в 4 координатах (x,y) относительнo origin
     std::array<std::pair<int,int>,4> cells;
-    int x, y; // позиция origin в поле
+    int x, y;
     int colorIndex;
 };
 
@@ -15,20 +14,23 @@ public:
     static const int HEIGHT = 20;
 
     Game();
-    void update(float dt); // dt в секундах
+    void update(float dt);
     void moveLeft();
     void moveRight();
-    void moveDown(); // ускорение
+    void moveDown();
     void hardDrop();
+    void rotate(); // ADD THIS
     const std::vector<int>& getGrid() const { return grid; }
     Piece getActive() const { return active; }
     void spawnRandom();
+    bool isGameOver() const { return gameOver; } // ADD THIS
 
 private:
-    std::vector<int> grid; // WIDTH * HEIGHT, 0 = empty, >0 = color index
+    std::vector<int> grid;
     Piece active;
     float fallTimer;
     float fallInterval;
+    bool gameOver; // ADD THIS
     bool checkCollision(const Piece& p) const;
     void lockPiece();
     void clearLines();
