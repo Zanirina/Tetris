@@ -15,25 +15,25 @@ void Game::spawnRandom()
     int r = std::rand() % 4;
     Piece p;
     p.x = WIDTH / 2 - 1;
-    p.y = HEIGHT - 4; // Start lower
+    p.y = HEIGHT - 1; // Начинаем сверху
     p.colorIndex = r + 1;
-
+    
     if(r == 0) { // I
-        p.cells = { std::make_pair(0,0), std::make_pair(0,1), std::make_pair(0,-1), std::make_pair(0,2) };
+        p.cells = { std::make_pair(0,0), std::make_pair(0,1), std::make_pair(0,-1), std::make_pair(0,-2) };
     } else if(r == 1) { // O
-        p.cells = { std::make_pair(0,0), std::make_pair(1,0), std::make_pair(0,1), std::make_pair(1,1) };
+        p.cells = { std::make_pair(0,0), std::make_pair(1,0), std::make_pair(0,-1), std::make_pair(1,-1) };
     } else if(r == 2) { // L
-        p.cells = { std::make_pair(0,0), std::make_pair(0,1), std::make_pair(0,-1), std::make_pair(1,-1) };
+        p.cells = { std::make_pair(0,0), std::make_pair(0,1), std::make_pair(0,-1), std::make_pair(1,1) };
     } else { // T
         p.cells = { std::make_pair(0,0), std::make_pair(-1,0), std::make_pair(1,0), std::make_pair(0,1) };
     }
-
+    
     active = p;
-
-    // Check if game over
+    
+    // Проверяем, можно ли разместить новую фигуру
     if(checkCollision(active)) {
         gameOver = true;
-        std::cout << "Game Over!" << std::endl;
+        std::cout << "Game Over! Cannot spawn new piece." << std::endl;
     }
 }
 
@@ -42,8 +42,14 @@ bool Game::checkCollision(const Piece& p) const
     for(auto &c : p.cells){
         int gx = p.x + c.first;
         int gy = p.y + c.second;
+        
+        // Проверка границ
         if(gx < 0 || gx >= WIDTH || gy < 0) return true;
-        if(gy < HEIGHT && grid[gy * WIDTH + gx] != 0) return true;
+        
+        // Проверка столкновения с заблокированными фигурами
+        if(gy < HEIGHT) {
+            if(grid[gy * WIDTH + gx] != 0) return true;
+        }
     }
     return false;
 }
@@ -69,13 +75,15 @@ void Game::lockPiece()
     for(auto &c : active.cells){
         int gx = active.x + c.first;
         int gy = active.y + c.second;
-        if(gy >= 0 && gy < HEIGHT && gx >= 0 && gx < WIDTH)
+        
+        // Проверяем, не выходит ли за пределы
+        if(gy >= 0 && gy < HEIGHT && gx >= 0 && gx < WIDTH) {
             grid[gy * WIDTH + gx] = active.colorIndex;
+        }
     }
     clearLines();
     spawnRandom();
 }
-
 void Game::clearLines()
 {
     for(int y = 0; y < HEIGHT; ++y){
