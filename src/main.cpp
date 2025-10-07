@@ -31,34 +31,34 @@ glm::vec3 colors[] = {
 void drawWalls(Renderer& renderer, const glm::vec3& camPos)
 {
     // Цвет стен
-    glm::vec3 wallColor(0.3f, 0.3f, 0.4f);
+    glm::vec3 wallColor(0.4f, 0.4f, 0.5f);
 
-    // Левая стенка
-    for(int y = 0; y < Game::HEIGHT + 1; ++y) {
-        glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(-0.5f, y, 0.0f));
-        model = glm::scale(model, glm::vec3(0.5f, 0.5f, 0.5f));
+    // Левая стенка (сдвинута левее)
+    for(int y = -1; y < Game::HEIGHT + 1; ++y) {
+        glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(-0.8f, y, 0.0f));
+        model = glm::scale(model, glm::vec3(0.4f, 0.5f, 0.5f));
         renderer.drawCube(model, wallColor, 0.3f, 0.8f, camPos);
     }
 
     // Правая стенка
-    for(int y = 0; y < Game::HEIGHT + 1; ++y) {
-        glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(Game::WIDTH, y, 0.0f));
-        model = glm::scale(model, glm::vec3(0.5f, 0.5f, 0.5f));
+    for(int y = -1; y < Game::HEIGHT + 1; ++y) {
+        glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(Game::WIDTH - 0.2f, y, 0.0f));
+        model = glm::scale(model, glm::vec3(0.4f, 0.5f, 0.5f));
         renderer.drawCube(model, wallColor, 0.3f, 0.8f, camPos);
     }
 
-    // Нижняя стенка (пол)
+    // Нижняя стенка (опущена ниже)
     for(int x = -1; x < Game::WIDTH + 1; ++x) {
-        glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(x, -0.5f, 0.0f));
-        model = glm::scale(model, glm::vec3(0.5f, 0.5f, 0.5f));
+        glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(x, -0.8f, 0.0f));
+        model = glm::scale(model, glm::vec3(0.5f, 0.4f, 0.5f));
         renderer.drawCube(model, wallColor, 0.3f, 0.8f, camPos);
     }
 
-    // Фон (задняя стенка) - опционально
-    for(int x = -1; x < Game::WIDTH + 1; ++x) {
-        for(int y = -1; y < Game::HEIGHT + 1; ++y) {
-            glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(x, y, -0.5f));
-            model = glm::scale(model, glm::vec3(0.5f, 0.5f, 0.5f));
+    // Задняя стенка (фон)
+    for(int x = -2; x < Game::WIDTH + 2; ++x) {
+        for(int y = -2; y < Game::HEIGHT + 2; ++y) {
+            glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(x, y, -0.6f));
+            model = glm::scale(model, glm::vec3(0.5f, 0.5f, 0.4f));
             renderer.drawCube(model, glm::vec3(0.2f, 0.2f, 0.25f), 0.4f, 0.9f, camPos);
         }
     }
@@ -180,14 +180,14 @@ int main()
         // Draw walls first
         drawWalls(renderer, camPos);
 
-        // Draw grid blocks (locked pieces)
+        // Draw grid blocks (locked pieces) - уменьшены для зазоров
         const auto& grid = game.getGrid();
         for(int y = 0; y < Game::HEIGHT; ++y){
             for(int x = 0; x < Game::WIDTH; ++x){
                 int cellValue = grid[y * Game::WIDTH + x];
                 if(cellValue != 0){
                     glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(x, y, 0.0f));
-                    model = glm::scale(model, glm::vec3(0.5f, 0.5f, 0.5f));
+                    model = glm::scale(model, glm::vec3(0.45f, 0.45f, 0.45f)); // Уменьшены
 
                     int colorIndex = cellValue - 1;
                     if(colorIndex >= 0 && colorIndex < 7) {
@@ -198,7 +198,7 @@ int main()
             }
         }
 
-        // Draw active piece
+        // Draw active piece - уменьшены для зазоров
         if(!game.isGameOver()) {
             auto active = game.getActive();
             for(auto &c : active.cells){
@@ -207,7 +207,7 @@ int main()
 
                 if(gy >= 0 && gy < Game::HEIGHT && gx >= 0 && gx < Game::WIDTH) {
                     glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(gx, gy, 0.0f));
-                    model = glm::scale(model, glm::vec3(0.5f, 0.5f, 0.5f));
+                    model = glm::scale(model, glm::vec3(0.45f, 0.45f, 0.45f)); // Уменьшены
 
                     int colorIndex = active.colorIndex - 1;
                     if(colorIndex >= 0 && colorIndex < 7) {
