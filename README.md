@@ -83,6 +83,11 @@ cd Tetris
 ---
 ## 🧩 Step 3A — Build with CLion (Recommended)
 Open the tetris/ folder in CLion.
+duplicate 
+├─ shaders/
+│ ├─ pbr.vs
+│ └─ pbr.fs
+to build directory
 
 Go to
 File → Settings → Build, Execution, Deployment → CMake
