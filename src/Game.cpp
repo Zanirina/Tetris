@@ -1,3 +1,4 @@
+//Game.cpp
 #include "Game.h"
 #include <cstdlib>
 #include <ctime>
@@ -78,10 +79,10 @@ bool Game::checkCollision(const Piece& p) const
     for(auto &c : p.cells){
         int gx = p.x + c.first;
         int gy = p.y + c.second;
-        
+
         // Проверка границ (стенок)
         if(gx < 0 || gx >= WIDTH || gy < 0) return true;
-        
+
         // Проверка столкновения с заблокированными фигурами
         if(gy < HEIGHT) {
             if(grid[gy * WIDTH + gx] != 0) return true;
@@ -140,7 +141,7 @@ void Game::lockPiece()
     for(auto &c : active.cells){
         int gx = active.x + c.first;
         int gy = active.y + c.second;
-        
+
         // Проверяем, не выходит ли за пределы
         if(gy >= 0 && gy < HEIGHT && gx >= 0 && gx < WIDTH) {
             grid[gy * WIDTH + gx] = active.colorIndex;
@@ -149,22 +150,31 @@ void Game::lockPiece()
     clearLines();
     spawnRandom();
 }
+// Updated parts of Game.cpp (replace/add these functions)
+
+// In clearLines():
 void Game::clearLines()
 {
+    int linesCleared = 0;
     for(int y = 0; y < HEIGHT; ++y){
         bool full = true;
         for(int x = 0; x < WIDTH; ++x){
             if(grid[y * WIDTH + x] == 0){ full = false; break; }
         }
         if(full){
+            linesCleared++;
             for(int yy = y; yy < HEIGHT-1; ++yy){
                 for(int x = 0; x < WIDTH; ++x)
                     grid[yy * WIDTH + x] = grid[(yy+1) * WIDTH + x];
             }
             for(int x = 0; x < WIDTH; ++x)
                 grid[(HEIGHT-1) * WIDTH + x] = 0;
-            --y;
+            --y;  // Re-check the same row after shifting
         }
+    }
+    if(linesCleared > 0) {
+        totalLines += linesCleared;
+        score += linesCleared * 100;  // Simple scoring: 100 per line
     }
 }
 

@@ -3,24 +3,20 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <iostream>
 #include <vector>
-
 #include "Shader.h"
 
-Renderer::Renderer()
-{
+Renderer::Renderer() {
     shader = new Shader("shaders/pbr.vs", "shaders/pbr.fs");
     initCube();
 }
 
-Renderer::~Renderer()
-{
+Renderer::~Renderer() {
     delete shader;
     glDeleteVertexArrays(1, &cubeVAO);
     glDeleteBuffers(1, &cubeVBO);
 }
 
-void Renderer::initCube()
-{
+void Renderer::initCube() {
     float vertices[] = {
         // positions          // normals
         -1.0f, -1.0f, -1.0f,  0.0f,  0.0f, -1.0f,
@@ -79,17 +75,18 @@ void Renderer::initCube()
     glBindVertexArray(0);
 }
 
-
-void Renderer::drawCube(const glm::mat4 &model, const glm::vec3 &albedo, float metallic, float roughness, const glm::vec3 &camPos)
+void Renderer::drawCube(const glm::mat4 &model, const glm::vec3 &albedo,
+                        float metallic, float roughness, const glm::vec3 &camPos)
 {
     shader->use();
     shader->setMat4("model", model);
+    shader->setVec3("objectColor", albedo); // добавлено — теперь кубы цветные
     shader->setVec3("albedo", albedo);
     shader->setFloat("metallic", metallic);
     shader->setFloat("roughness", roughness);
     shader->setFloat("ao", 1.0f);
     shader->setVec3("camPos", camPos);
-    // set lights (example)
+
     glm::vec3 lightPositions[4] = {
         glm::vec3(10.0f, 10.0f, 10.0f),
         glm::vec3(-10.0f, 10.0f, 10.0f),
@@ -97,18 +94,18 @@ void Renderer::drawCube(const glm::mat4 &model, const glm::vec3 &albedo, float m
         glm::vec3(-10.0f, -10.0f, 10.0f)
     };
     glm::vec3 lightColors[4] = {
-        glm::vec3(300.0f, 300.0f, 300.0f),
-        glm::vec3(300.0f, 300.0f, 300.0f),
-        glm::vec3(300.0f, 300.0f, 300.0f),
-        glm::vec3(300.0f, 300.0f, 300.0f)
+        glm::vec3(300.0f),
+        glm::vec3(300.0f),
+        glm::vec3(300.0f),
+        glm::vec3(300.0f)
     };
-    for(int i=0;i<4;i++){
+
+    for (int i = 0; i < 4; i++) {
         shader->setVec3("lightPositions[" + std::to_string(i) + "]", lightPositions[i]);
         shader->setVec3("lightColors[" + std::to_string(i) + "]", lightColors[i]);
     }
 
     glBindVertexArray(cubeVAO);
-    // draw 36 vertices
     glDrawArrays(GL_TRIANGLES, 0, 36);
     glBindVertexArray(0);
 }
