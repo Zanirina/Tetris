@@ -1,0 +1,3 @@
+C:/Users/22208/CLionProjects/tetris/cmake-build-release/CMakeFiles/TetrisPBR.dir
+C:/Users/22208/CLionProjects/tetris/cmake-build-release/CMakeFiles/edit_cache.dir
+C:/Users/22208/CLionProjects/tetris/cmake-build-release/CMakeFiles/rebuild_cache.dir
