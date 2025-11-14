@@ -1,4 +1,3 @@
-// main.cpp
 #define IMGUI_IMPL_OPENGL_LOADER_GLAD
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
@@ -17,7 +16,7 @@ Game game;
 Renderer *rendererPtr = nullptr;
 float lastTime = 0.0f;
 float keyTimer = 0.0f;
-const float KEY_COOLDOWN = 0.15f; // немного медленнее, чтобы не слишком чувствительно
+const float KEY_COOLDOWN = 0.15f; 
 float downKeyTimer = 0.0f;
 const float DOWN_KEY_COOLDOWN = 0.03f;
 
@@ -57,35 +56,34 @@ void drawWalls(Renderer &renderer, const glm::vec3 &camPos) {
         }
 }
 
-void processInput(GLFWwindow *window, float dt, bool &wasGameOver) {
+void processInput(GLFWwindow *window, float dt) {
     keyTimer += dt;
     downKeyTimer += dt;
     static bool spacePressed = false;
     static bool rPressed = false;
 
-    if(glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS){
-        if(!spacePressed){
+    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
+        if (!spacePressed && !game.isGameOver()) {
             game.hardDrop();
             spacePressed = true;
         }
     } else spacePressed = false;
 
-    if(game.isGameOver() && glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS){
-        if(!rPressed){
+    if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS) {
+        if (!rPressed && game.isGameOver()) {
             game = Game();
-            wasGameOver = false;
             rPressed = true;
         }
     } else rPressed = false;
 
-    if(keyTimer >= KEY_COOLDOWN){
-        if(glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS){ game.moveLeft(); keyTimer=0;}
-        if(glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS){ game.moveRight(); keyTimer=0;}
-        if(glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS){ game.rotate(); keyTimer=0;}
+    if (keyTimer >= KEY_COOLDOWN) {
+        if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) { game.moveLeft(); keyTimer = 0; }
+        if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) { game.moveRight(); keyTimer = 0; }
+        if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) { game.rotate(); keyTimer = 0; }
     }
 
-    if(downKeyTimer >= DOWN_KEY_COOLDOWN){
-        if(glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS){ game.moveDown(); downKeyTimer=0;}
+    if (downKeyTimer >= DOWN_KEY_COOLDOWN) {
+        if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) { game.moveDown(); downKeyTimer = 0; }
     }
 }
 
@@ -127,7 +125,6 @@ int main(){
 
     lastTime = (float)glfwGetTime();
 
-    // ImGui
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGuiIO &io = ImGui::GetIO(); (void)io;
@@ -135,18 +132,17 @@ int main(){
     ImGui_ImplGlfw_InitForOpenGL(window,true);
     ImGui_ImplOpenGL3_Init("#version 330");
 
-    bool wasGameOver = false;
-
     while(!glfwWindowShouldClose(window)){
         float time = (float)glfwGetTime();
         float dt = time - lastTime;
         lastTime = time;
 
-        processInput(window, dt, wasGameOver);
+        processInput(window, dt);
         game.update(dt);
 
-        glViewport(0,0,windowWidth,windowHeight);
-        glClearColor(0.05f,0.05f,0.1f,1.0f);
+
+        glViewport(0, 0, windowWidth, windowHeight);
+        glClearColor(0.05f, 0.05f, 0.1f, 1.0f); 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         drawWalls(renderer, camPos);
@@ -175,13 +171,12 @@ int main(){
             }
         }
 
-        // ImGui
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
-        ImGui::SetNextWindowPos({10,10});
-        ImGui::SetNextWindowSize({200,80});
+        ImGui::SetNextWindowPos(ImVec2(10,10));
+        ImGui::SetNextWindowSize(ImVec2(200,80));
         ImGuiWindowFlags flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize |
                                  ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar |
                                  ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoBackground;
@@ -191,17 +186,17 @@ int main(){
         }
         ImGui::End();
 
-        if(game.isGameOver() && !wasGameOver) ImGui::OpenPopup("Game Over");
-        wasGameOver = game.isGameOver();
-
-        if(ImGui::BeginPopupModal("Game Over",nullptr,ImGuiWindowFlags_AlwaysAutoResize)){
+        if(game.isGameOver()){
+            ImGui::SetNextWindowPos(ImVec2(windowWidth/2 - 120, windowHeight/2 - 60), ImGuiCond_Always);
+            ImGui::SetNextWindowSize(ImVec2(240, 120), ImGuiCond_Always);
+            ImGui::Begin("Game Over", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse);
             ImGui::Text("GAME OVER!");
             ImGui::Separator();
             ImGui::Text("Score: %d", game.getScore());
             ImGui::Text("Lines: %d", game.getLines());
             ImGui::Separator();
-            ImGui::Text("Press R to restart");
-            ImGui::EndPopup();
+            ImGui::TextColored(ImVec4(0.8f,0.8f,0.8f,1.0f), "Press R to restart");
+            ImGui::End();
         }
 
         glDisable(GL_DEPTH_TEST);
