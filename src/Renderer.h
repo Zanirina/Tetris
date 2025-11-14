@@ -9,6 +9,7 @@ public:
     ~Renderer();
     void drawCube(const glm::mat4 &model, const glm::vec3 &albedo, float metallic, float roughness, const glm::vec3 &camPos);
     Shader* getShader() { return shader; }
+    float currentFadeValue = 1.0f;
 private:
     unsigned int cubeVAO, cubeVBO;
     Shader* shader;

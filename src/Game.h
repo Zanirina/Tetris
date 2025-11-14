@@ -37,6 +37,8 @@ private:
     bool gameOver;
     int score = 0;
     int totalLines = 0;
+    float fadeTimer;   // время появления блока
+    float fadeValue;   // от 0 до 1
 
     void spawnRandom();
     bool checkCollision(const Piece& p) const;
