@@ -29,6 +29,7 @@ public:
     int getScore() const { return score; }
     int getLines() const { return totalLines; }
 
+
 private:
     std::vector<int> grid;
     Piece active;
