@@ -10,7 +10,7 @@
 #include <iostream>
 #include "Renderer.h"
 #include "Game.h"
-
+bool rPressed = false;
 int windowWidth = 1280;
 int windowHeight = 720;
 Game game;
@@ -162,16 +162,12 @@ int main(){
                 }
             }
 
-        if(!game.isGameOver()){
-            auto active = game.getActive();
-            for(auto &c : active.cells){
-                int gx = active.x + c.first;
-                int gy = active.y + c.second;
-                if(gx>=0 && gx<Game::WIDTH && gy>=0 && gy<Game::HEIGHT){
-                    glm::mat4 model = glm::translate(glm::mat4(1.0f),{(float)gx,(float)gy,0.0f});
-                    model = glm::scale(model,{0.45f,0.45f,0.45f});
-                    renderer.drawCube(model,colors[active.colorIndex-1],0.3f,0.3f,camPos);
-                }
+        if (game.isGameOver() && glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS) {
+            if (!rPressed) {
+                game = Game();
+                wasGameOver = false;
+                std::cout << "Game Restarted!\n";
+                rPressed = true;
             }
         }
 
